@@ -1,0 +1,2135 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>학생 강화하기</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;900&family=Black+Han+Sans&display=swap');
+
+    :root {
+      --bg: #0a0a1a;
+      --panel: #111128;
+      --panel2: #1a1a35;
+      --border: #2a2a5a;
+      --gold: #f5c542;
+      --gold2: #000000;
+      --blue: #4a9eff;
+      --green: #3ddc84;
+      --red: #ff4a6e;
+      --purple: #b06aff;
+      --text: #e8e8ff;
+      --text2: #9090c0;
+
+      /* 버튼 그라디언트 */
+      --btn-enhance-a: #1a6eff; --btn-enhance-b: #0040cc;
+      --btn-sell-a: #f5c542;    --btn-sell-b: #c09020;    --btn-sell-text: #111;
+      --btn-office-a: #6a1fb0;  --btn-office-b: #430c80;
+      --btn-upgrade-a: #b06aff; --btn-upgrade-b: #7040d0;
+      --btn-dissolve-a: #b06aff;--btn-dissolve-b: #7040d0;
+      --btn-start-a: #1a6eff;   --btn-start-b: #0040cc;
+      --modal-ok-a: #1a6eff;    --modal-ok-b: #0040cc;
+      --vend-hover: #1a2040;
+      --modal-bg: rgba(0,0,0,.75);
+      --win-bg: rgba(0,0,0,.92);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      background-image:
+        radial-gradient(1px 1px at 20% 30%, rgba(255, 255, 255, .4) 0%, transparent 100%),
+        radial-gradient(1px 1px at 60% 70%, rgba(255, 255, 255, .3) 0%, transparent 100%),
+        radial-gradient(1px 1px at 80% 20%, rgba(255, 255, 255, .5) 0%, transparent 100%),
+        radial-gradient(1px 1px at 40% 80%, rgba(255, 255, 255, .2) 0%, transparent 100%),
+        radial-gradient(1px 1px at 10% 60%, rgba(255, 255, 255, .4) 0%, transparent 100%);
+      pointer-events: none;
+    }
+
+    h1 {
+      font-family: 'Black Han Sans', sans-serif;
+      text-align: center;
+      font-size: 2.4rem;
+      padding: 18px 0 10px;
+      background: linear-gradient(90deg, var(--gold), #fff, var(--gold));
+      background-clip: text;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: 2px;
+      position: relative;
+      z-index: 1;
+    }
+
+    #app-header {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 16px 16px 0;
+      position: relative;
+      z-index: 1;
+    }
+
+    .status-card {
+      position: relative;
+      padding: 14px 20px;
+    }
+
+    .status-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      align-items: center;
+    }
+
+    .stat-block {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1px;
+      text-align: center;
+      min-width: 0;
+      padding: 0 12px;
+    }
+
+    .stat-block+.stat-block {
+      border-left: 1px solid var(--border);
+    }
+
+    .stat-label {
+      font-size: .70rem;
+      color: var(--text2);
+    }
+
+    .stat-val {
+      font-weight: 700;
+      font-size: 1.05rem;
+      color: var(--gold);
+      max-width: 100%;
+      word-break: keep-all;
+      overflow-wrap: anywhere;
+    }
+
+    #luck-badge {
+      position: absolute;
+      top: 8px;
+      right: 12px;
+      background: linear-gradient(135deg, var(--purple), #c06aff);
+      color: #fff;
+      border-radius: 8px;
+      padding: 4px 12px;
+      font-size: .8rem;
+      font-weight: 700;
+      display: none;
+      white-space: nowrap;
+    }
+
+    #main {
+      display: grid;
+      grid-template-columns: 1fr 320px;
+      gap: 16px;
+      padding: 16px;
+      max-width: 1100px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 18px;
+    }
+
+    .card-title {
+      font-family: 'Black Han Sans', sans-serif;
+      font-size: 1.1rem;
+      color: var(--gold);
+      margin-bottom: 14px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      width: 100%;
+    }
+
+    #student-display {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      padding: 24px;
+    }
+
+    #student-image-box {
+      width: 160px;
+      height: 160px;
+      border: 3px solid var(--border);
+      border-radius: 12px;
+      background: var(--panel2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: .75rem;
+      color: var(--text2);
+      text-align: center;
+      overflow: hidden;
+      position: relative;
+      transition: border-color .3s;
+    }
+
+    #student-image-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: none;
+      border-radius: 10px;
+    }
+
+    .img-placeholder {
+      pointer-events: none;
+      padding: 10px;
+      line-height: 1.5;
+    }
+
+    #student-name {
+      font-family: 'Black Han Sans', sans-serif;
+      font-size: 1.6rem;
+      color: var(--text);
+      text-shadow: 0 0 20px rgba(74, 158, 255, .6);
+    }
+
+    #student-grade {
+      font-size: .85rem;
+      color: var(--text2);
+    }
+
+    .prob-bar-wrap {
+      width: 100%;
+    }
+
+    .prob-bar-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: .8rem;
+      color: var(--text2);
+      margin-bottom: 4px;
+    }
+
+    .prob-bar {
+      height: 8px;
+      background: var(--panel2);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .prob-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--blue), var(--green));
+      border-radius: 4px;
+      transition: width .5s;
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 10px;
+      width: 100%;
+    }
+
+    .btn {
+      flex: 1;
+      height: 75px;
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      border: none;
+      border-radius: 10px;
+      font-family: 'Noto Sans KR', sans-serif;
+      font-weight: 700;
+      font-size: .95rem;
+      cursor: pointer;
+      transition: filter .15s, transform .1s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn:active {
+      transform: scale(.97);
+    }
+
+    .btn:hover {
+      filter: brightness(1.15);
+    }
+
+    .btn-enhance {
+      background: linear-gradient(135deg, #1a6eff, #0040cc);
+      color: #fff;
+    }
+
+    .btn-sell {
+      background: linear-gradient(135deg, var(--btn-sell-a), var(--btn-sell-b));
+      color: var(--btn-sell-text);
+    }
+
+
+    .btn-cost {
+      font-size: .75rem;
+      font-weight: 400;
+      opacity: .85;
+    }
+
+    #office-lv {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--purple);
+    }
+
+    #office-info {
+      font-size: .8rem;
+      color: var(--text2);
+      margin-bottom: 10px;
+    }
+
+    .btn-office-row {
+      display: flex;
+      gap: 10px;
+    }
+
+    .btn-office {
+      flex: 1;
+      padding: 12px 0;
+      height: 70px;
+      background: linear-gradient(135deg, var(--btn-office-a), var(--btn-office-b));
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-family: 'Noto Sans KR', sans-serif;
+      font-weight: 700;
+      font-size: .9rem;
+      cursor: pointer;
+      transition: filter .15s, transform .1s;
+    }
+
+    .btn-office:active {
+      transform: scale(.97);
+    }
+
+    .btn-office:hover {
+      filter: brightness(1.2);
+    }
+
+    .office-prob-bar-wrap {
+      width: 100%;
+      margin-bottom: 10px;
+    }
+
+    .vend-row {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .btn-vend {
+      width: 100%;
+      padding: 10px 14px;
+      background: var(--panel2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      font-family: 'Noto Sans KR', sans-serif;
+      font-size: .85rem;
+      cursor: pointer;
+      text-align: left;
+      transition: border-color .2s, background .2s;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .btn-vend:hover {
+      border-color: var(--blue);
+      background: var(--vend-hover);
+    }
+
+    .vend-price {
+      color: var(--gold);
+      font-weight: 700;
+    }
+
+    #shield-count {
+      font-size: .75rem;
+      color: var(--text2);
+    }
+
+
+    #fx-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      pointer-events: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #fx-text {
+      font-family: 'Black Han Sans', sans-serif;
+      font-size: 3.2rem;
+      opacity: 0;
+      transform: scale(.8);
+      text-shadow: 0 0 40px currentColor;
+      transition: none;
+      white-space: pre-wrap;
+      text-align: center;
+      line-height: 1.3;
+    }
+
+    @keyframes fxIn {
+      0% {
+        opacity: 0;
+        transform: scale(.8)
+      }
+
+      40% {
+        opacity: 1;
+        transform: scale(1.1)
+      }
+
+      70% {
+        transform: scale(.95)
+      }
+
+      100% {
+        opacity: 1;
+        transform: scale(1)
+      }
+    }
+
+    @keyframes fxOut {
+      0% {
+        opacity: 1;
+        transform: scale(1)
+      }
+
+      100% {
+        opacity: 0;
+        transform: scale(1.2)
+      }
+    }
+
+    .particle {
+      position: fixed;
+      pointer-events: none;
+      z-index: 101;
+      border-radius: 50%;
+      animation: particle-fly 1.2s ease-out forwards;
+    }
+
+    @keyframes particle-fly {
+      0% {
+        opacity: 1;
+        transform: translate(0, 0) scale(1);
+      }
+
+      100% {
+        opacity: 0;
+        transform: translate(var(--tx), var(--ty)) scale(0);
+      }
+    }
+
+    .modal-bg {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 200;
+      background: var(--modal-bg);
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-bg.open {
+      display: flex;
+    }
+
+    .modal {
+      background: var(--panel);
+      border: 2px solid var(--border);
+      border-radius: 16px;
+      padding: 28px;
+      max-width: 480px;
+      width: 90%;
+    }
+
+    .modal h2 {
+      font-family: 'Black Han Sans', sans-serif;
+      font-size: 1.4rem;
+      margin-bottom: 14px;
+      color: var(--gold);
+    }
+
+    .modal p {
+      margin-bottom: 12px;
+      line-height: 1.7;
+    }
+
+    .modal-choices {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin: 14px 0;
+    }
+
+    .choice-btn {
+      width: 100%;
+      padding: 10px 14px;
+      background: var(--panel2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      font-family: 'Noto Sans KR', sans-serif;
+      font-size: .9rem;
+      cursor: pointer;
+      text-align: left;
+      transition: border-color .2s;
+    }
+
+    .choice-btn:hover {
+      border-color: var(--blue);
+    }
+
+    .choice-btn.selected {
+      border-color: var(--green);
+      background: rgba(61, 220, 132, .08);
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .btn-modal-ok {
+      flex: 1;
+      padding: 10px;
+      background: linear-gradient(135deg, #1a6eff, #0040cc);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-family: 'Noto Sans KR', sans-serif;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .btn-modal-ok:hover {
+      filter: brightness(1.1);
+    }
+
+    /* ── 게임 종료 화면 ── */
+    #win-screen {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 300;
+      background: var(--win-bg);
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    #win-screen.open {
+      display: flex;
+    }
+
+    #win-screen h1 {
+      font-family: 'Black Han Sans', sans-serif;
+      font-size: 3rem;
+      color: var(--gold);
+      -webkit-text-fill-color: var(--gold);
+    }
+
+    #win-screen p {
+      font-size: 1.1rem;
+      color: var(--text2);
+    }
+
+    #btn-restart {
+      padding: 14px 40px;
+      font-size: 1.1rem;
+      background: linear-gradient(135deg, var(--btn-start-a), var(--btn-start-b));
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      font-family: 'Noto Sans KR', sans-serif;
+      font-weight: 700;
+      cursor: pointer;
+      transition: filter .15s, transform .1s;
+    }
+
+    #btn-restart:hover {
+      filter: brightness(1.15);
+    }
+
+    #btn-restart:active {
+      transform: scale(.97);
+    }
+
+
+
+    @media(max-width:720px) {
+      #main {
+        grid-template-columns: 1fr;
+      }
+
+      h1 {
+        font-size: 1.7rem;
+      }
+
+      .stat-block {
+        padding: 0 8px;
+      }
+
+      .stat-val {
+        font-size: .95rem;
+      }
+    }
+
+    /* ── 라이트 테마 ── */
+    [data-theme="light"] {
+      --bg: #f5f4ef;
+      --panel: #ffffff;
+      --panel2: #eeede8;
+      --border: #dddcd5;
+      --gold: #966f00;
+      --gold2: #7a5800;
+      --blue: #2563eb;
+      --green: #16a34a;
+      --red: #dc2626;
+      --purple: #7c3aed;
+      --text: #1a1a1a;
+      --text2: #737373;
+
+      /* 버튼 그라디언트 — 라이트용 */
+      --btn-enhance-a: #2563eb; --btn-enhance-b: #1d4ed8;
+      --btn-sell-a: #d97706;    --btn-sell-b: #b45309;    --btn-sell-text: #fff;
+      --btn-office-a: #7c3aed;  --btn-office-b: #5b21b6;
+      --btn-upgrade-a: #7c3aed; --btn-upgrade-b: #5b21b6;
+      --btn-dissolve-a: #7c3aed;--btn-dissolve-b: #5b21b6;
+      --btn-start-a: #2563eb;   --btn-start-b: #1d4ed8;
+      --modal-ok-a: #2563eb;    --modal-ok-b: #1d4ed8;
+      --vend-hover: #e8edf8;
+      --modal-bg: rgba(0,0,0,.45);
+      --win-bg: rgba(245,244,239,.96);
+    }
+
+    [data-theme="light"] body {
+      background: var(--bg);
+    }
+
+    [data-theme="light"] body::before {
+      background-image: none;
+    }
+
+    [data-theme="light"] h1 {
+      background: linear-gradient(90deg, var(--gold), #3d3530, var(--gold));
+      background-clip: text;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    [data-theme="light"] .card {
+      box-shadow: 0 1px 6px rgba(0, 0, 0, .06), 0 3px 14px rgba(0, 0, 0, .05);
+    }
+
+    [data-theme="light"] .btn-vend:hover {
+      background: #e8edfb;
+      border-color: var(--blue);
+    }
+
+    [data-theme="light"] #fx-text {
+      -webkit-text-stroke: 1px rgba(0, 0, 0, .08);
+    }
+
+    [data-theme="light"] .choice-btn.selected {
+      background: rgba(22, 163, 74, .08);
+    }
+
+    [data-theme="light"] #enhance-frag-label {
+      color: var(--purple);
+    }
+    [data-theme="light"] #win-screen h2 { color: var(--text); }
+    [data-theme="light"] #win-screen p  { color: var(--text2); }
+    [data-theme="light"] .island { box-shadow: 0 2px 8px rgba(0,0,0,.1); }
+    [data-theme="light"] #settings-panel { box-shadow: 0 8px 28px rgba(0,0,0,.15); }
+    [data-theme="light"] #settings-btn { background: var(--panel); color: var(--text2); }
+    [data-theme="light"] .btn-setting { background: var(--panel2); color: var(--text); border-color: var(--border); }
+    [data-theme="light"] .btn-setting:hover { background: var(--border); }
+    [data-theme="light"] .storage-tab { background: var(--panel2); color: var(--text2); border-color: var(--border); }
+    [data-theme="light"] .btn-store-top { border-color: var(--border); color: var(--text2); }
+    [data-theme="light"] .btn-sa { background: var(--panel2); border-color: var(--border); color: var(--text); }
+    [data-theme="light"] .btn-sa:hover { background: var(--border); }
+    [data-theme="light"] .exam-container { background: var(--panel2); border-color: var(--border); }
+    [data-theme="light"] .choice-btn { background: var(--panel); border-color: var(--border); color: var(--text); }
+    [data-theme="light"] .choice-btn:hover { border-color: var(--blue); background: #dbeafe; }
+    [data-theme="light"] .btn-vend.locked { border-color: var(--border); }
+    [data-theme="light"] #luck-badge { background: linear-gradient(135deg, var(--purple), #9a5af0); }
+
+    /* ── 비활성 버튼 (disabled 대체) ── */
+    .btn.btn-off {
+      background: var(--panel2) !important;
+      color: var(--text2) !important;
+      cursor: default !important;
+      border: 1px solid var(--border);
+      filter: none !important;
+      pointer-events: none;
+    }
+
+    .btn-office.btn-off {
+      background: var(--panel2) !important;
+      color: var(--text2) !important;
+      cursor: default;
+      border: 1px solid var(--border);
+      pointer-events: none;
+    }
+
+    /* ── 분해 버튼 ── */
+    .btn-dissolve-cur {
+      flex: 1;
+      background: linear-gradient(135deg, var(--btn-dissolve-a), var(--btn-dissolve-b));
+      border: 1px solid transparent;
+      color: #fff;
+      border-radius: 10px;
+      font-family: 'Noto Sans KR', sans-serif;
+      font-weight: 700;
+      font-size: .88rem;
+      cursor: pointer;
+      transition: filter .15s, transform .1s;
+      padding: 12px 0;
+    }
+
+    .btn-dissolve-cur:hover {
+      filter: brightness(1.15);
+    }
+
+    .btn-dissolve-cur:active {
+      transform: scale(.97);
+    }
+
+    .btn-dissolve-cur.btn-off {
+      background: var(--panel2) !important;
+      color: var(--text2) !important;
+      border: 1px solid var(--border);
+      cursor: default !important;
+      filter: none !important;
+      pointer-events: none;
+    }
+
+    /* ── 휴지 토글 pill ── */
+    .shield-pill {
+      float: right;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: .7rem;
+      font-weight: 700;
+      border: 1px solid var(--border);
+      background: var(--panel2);
+      color: var(--text2);
+      cursor: pointer;
+      transition: all .15s;
+      margin-top: -4px;
+      margin-left: auto;
+    }
+
+    .shield-pill.on {
+      color: var(--green);
+    }
+
+    .shield-pill.off {
+      color: var(--red);
+    }
+
+    /* ── 자판기 헤더 ── */
+    .vend-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .vend-lv-badge {
+      font-size: .8rem;
+      font-weight: 1000;
+      color: var(--gold);
+      margin-top: 4px;
+    }
+
+    .btn-vend-upgrade {
+      background: linear-gradient(135deg, var(--btn-upgrade-a), var(--btn-upgrade-b));
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-family: 'Noto Sans KR', sans-serif;
+      font-size: .75rem;
+      font-weight: 800;
+      cursor: pointer;
+      transition: filter .15s;
+      margin-left: auto;
+      box-sizing: border-box;
+      padding: 3px 14px;
+    }
+
+    .btn-vend-upgrade:hover {
+      filter: brightness(1.15);
+    }
+
+    .btn-vend-upgrade.btn-off {
+      background: var(--panel2);
+      color: var(--text2);
+      border: 1px solid var(--border);
+      cursor: default;
+      filter: none;
+      pointer-events: none;
+    }
+
+    .btn-vend.locked {
+      opacity: .4;
+      cursor: default;
+      border-style: dashed;
+    }
+
+    .btn-vend.locked:hover {
+      border-color: var(--border);
+      background: var(--panel2);
+    }
+
+    .vend-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .vend-name {
+      font-size: .87rem;
+      font-weight: 700;
+    }
+
+    .vend-desc {
+      font-size: .72rem;
+      color: var(--text2);
+    }
+
+    .vend-price-wrap {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      white-space: nowrap;
+      font-size: .82rem;
+      color: var(--text2);
+    }
+
+    /* ── 강화 버튼 조각 레이블 ── */
+    #enhance-frag-label {
+      color: #d4a0ff;
+    }
+
+
+    /* ── 보관함 ── */
+    .inventory-empty {
+      font-size: .8rem;
+      color: var(--text2);
+      padding: 4px 0;
+    }
+
+    .inventory-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .inventory-card {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+      padding: 8px 10px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--panel2);
+      flex-shrink: 0;
+    }
+
+    .inventory-icon {
+      font-size: 1.1rem;
+      flex-shrink: 0;
+    }
+
+    .inventory-body {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .inventory-title {
+      font-weight: 700;
+      font-size: .85rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .inventory-meta {
+      font-size: .72rem;
+      color: var(--text2);
+    }
+
+    .inventory-badge {
+      font-weight: 700;
+      font-size: .85rem;
+      color: var(--purple);
+      background: rgba(124, 58, 237, .12);
+      border: 1px solid rgba(124, 58, 237, .25);
+      border-radius: 6px;
+      padding: 2px 8px;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+
+    /* ── 설정 ── */
+    #settings-btn {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 160;
+      width: 46px;
+      height: 46px;
+      border-radius: 50%;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      color: var(--text2);
+      font-size: 1.25rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 3px 16px rgba(0, 0, 0, .22);
+      transition: background .2s
+    }
+
+    #settings-btn:hover {
+      background: var(--panel2);
+    }
+
+    #settings-panel {
+      position: fixed;
+      bottom: 80px;
+      right: 24px;
+      z-index: 160;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 18px;
+      width: 240px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, .28);
+      display: none;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    #settings-panel.open {
+      display: flex;
+    }
+
+    .settings-title {
+      font-family: 'Black Han Sans', sans-serif;
+      font-size: 1rem;
+      color: var(--gold);
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 8px;
+    }
+
+    .settings-row {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .settings-label {
+      font-size: .8rem;
+      color: var(--text2);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .settings-slider {
+      width: 100%;
+      accent-color: var(--blue);
+      cursor: pointer;
+    }
+
+    .btn-setting {
+      width: 100%;
+      padding: 9px;
+      background: var(--panel2);
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      color: var(--text);
+      font-family: 'Noto Sans KR', sans-serif;
+      font-size: .88rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background .2s;
+    }
+
+    .btn-setting:hover {
+      background: var(--border);
+    }
+
+    .btn-setting.danger {
+      border-color: var(--red);
+      color: #fff;
+      background: var(--red);
+    }
+
+    .btn-setting.danger:hover {
+      filter: brightness(1.12);
+    }
+
+    /* ── 시작 화면 ── */
+    #start-screen {
+      position: fixed;
+      inset: 0;
+      z-index: 500;
+      background: rgba(0, 0, 0, .78);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      backdrop-filter: blur(3px);
+    }
+
+    #start-screen.hidden {
+      animation: fadeOutScreen .4s ease forwards;
+      pointer-events: none;
+    }
+
+    @keyframes fadeOutScreen {
+      to {
+        opacity: 0;
+      }
+    }
+
+    .start-title {
+      font-family: 'Black Han Sans', sans-serif;
+      font-size: 4rem;
+      color: #fff;
+      letter-spacing: 4px;
+      text-shadow: 0 0 50px rgba(74, 158, 255, .9), 0 2px 8px rgba(0, 0, 0, .6);
+      text-align: center;
+    }
+
+    .start-sub {
+      color: rgba(255, 255, 255, .55);
+      font-size: 1rem;
+      letter-spacing: 1px;
+    }
+
+    #btn-start {
+      margin-top: 8px;
+      padding: 16px 56px;
+      font-size: 1.15rem;
+      background: linear-gradient(135deg, #1a6eff, #0040cc);
+      color: #fff;
+      border: none;
+      border-radius: 14px;
+      font-family: 'Noto Sans KR', sans-serif;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 4px 28px rgba(26, 110, 255, .55);
+      transition: filter .15s, transform .1s;
+    }
+
+    #btn-start:hover {
+      filter: brightness(1.15);
+    }
+
+    #btn-start:active {
+      transform: scale(.97);
+    }
+
+    /* ── 보관함 탭 ── */
+    .storage-tabs {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 10px;
+    }
+
+    .storage-tab {
+      flex: 1;
+      padding: 6px 0;
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      background: var(--panel2);
+      color: var(--text2);
+      font-family: 'Noto Sans KR', sans-serif;
+      font-size: .78rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all .15s;
+    }
+
+    .storage-tab.active {
+      background: var(--blue);
+      color: #fff;
+      border-color: var(--blue);
+    }
+
+    .storage-pane {
+      display: none;
+    }
+
+    .storage-pane.active {
+      display: block;
+    }
+
+    .btn-retrieve {
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-family: 'Noto Sans KR', sans-serif;
+      font-size: .75rem;
+      font-weight: 700;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: var(--panel2);
+      color: var(--text);
+      transition: background .15s;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .btn-retrieve:hover {
+      background: var(--border);
+    }
+
+    /* ── 보관 버튼 (카드 상단) ── */
+    .btn-store-top {
+      width: 16%;
+      margin-bottom: -12px;
+      margin-left: 42%;
+      padding: 10px 0;
+      border: 1px double var(--border);
+      border-radius: 8px;
+      background: transparent;
+      color: var(--text2);
+      font-family: 'Noto Sans KR', sans-serif;
+      font-size: .82rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all .15s;
+    }
+
+    .btn-store-top:hover {
+      border-color: var(--green);
+      color: var(--green);
+      background: rgba(61, 220, 132, .06);
+    }
+
+    .btn-store-top.btn-off {
+      opacity: .35;
+      pointer-events: none;
+    }
+
+    /* ── 자판기 강화 조건 배지 ── */
+    .vend-req-badge {
+      font-size: .7rem;
+      color: var(--red);
+      margin-left: 6px;
+      font-weight: 700;
+    }
+  </style>
+</head>
+
+<body>
+
+  <header id="app-header">
+    <div class="card status-card">
+      <span id="luck-badge">확률 x2 (30초)</span>
+      <div class="status-grid">
+        <div class="stat-block">
+          <span class="stat-label">보유 골드</span>
+          <span class="stat-val" id="gold-display">10,000G</span>
+        </div>
+        <div class="stat-block">
+          <span class="stat-label">최대 도달 단계</span>
+          <span class="stat-val" id="max-stage-display">잼민이</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div id="main">
+
+    <!-- 왼쪽 컬럼 -->
+    <div style="display:flex;flex-direction:column;gap:16px;">
+
+      <!-- 학생 디스플레이 -->
+      <div class="card">
+        <div class="card-title">🎓 현재 학생<button id="btn-shield-toggle" class="shield-pill on"
+            onclick="toggleShieldUse()">🧻 휴지 사용 ON</button></div>
+        <button class="btn-store-top btn-off" id="btn-store" onclick="storeStudent()">보관</button>
+        <div id="student-display">
+          <div id="student-image-box">
+            <img id="student-img" alt="학생 이미지">
+            <div class="img-placeholder" id="img-placeholder-text">
+              이미지가 존재하지 않음
+            </div>
+          </div>
+          <div id="student-name">잼민이</div>
+          <div id="student-grade">단계 0 / 24</div>
+          <div class="prob-bar-wrap">
+            <div class="prob-bar-label">
+              <span>강화 성공 확률</span>
+              <span id="prob-text">100%</span>
+            </div>
+            <div class="prob-bar">
+              <div class="prob-bar-fill" id="prob-fill" style="width:100%"></div>
+            </div>
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-enhance" id="btn-enhance" onclick="doEnhance()">
+              강화<br>
+              <span class="btn-cost" id="enhance-cost-label">비용: 10G</span>
+              <span class="btn-cost" id="enhance-frag-label" style="display:none;"></span>
+            </button>
+            <button class="btn btn-sell" id="btn-sell" onclick="doSell()">
+              판매<br><span class="btn-cost" id="sell-price-label">판매가: 5G</span>
+            </button>
+            <button class="btn-dissolve-cur btn-off" id="btn-dissolve-cur"
+              onclick="dissolveCurrentStudent()">분해<br><span class="btn-cost" id="dissolve-frag-label">조각
+                3~6개</span></button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 보관함 -->
+      <div class="card" id="storage-card">
+        <div class="card-title">보관함</div>
+        <div class="storage-tabs">
+          <button class="storage-tab active" id="tab-students" onclick="switchInventoryTab('students')">학생</button>
+          <button class="storage-tab" id="tab-frags" onclick="switchInventoryTab('frags')">조각</button>
+        </div>
+        <div class="storage-pane active" id="pane-students">
+          <div id="stored-student-list" class="inventory-list">
+            <p class="inventory-empty">보관된 학생이 없습니다</p>
+          </div>
+        </div>
+        <div class="storage-pane" id="pane-frags">
+          <div id="fragment-list" class="inventory-list">
+            <p class="inventory-empty">보유 조각이 없습니다</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- 오른쪽 컬럼 -->
+    <div style="display:flex;flex-direction:column;gap:16px;">
+
+      <!-- 교무실 -->
+      <div class="card">
+        <div class="card-title">🏫 교무실 강화</div>
+        <div id="office-lv">Lv.0 — 수입 없음</div>
+        <div id="office-info">다음: Lv.1 — 5G/s</div>
+
+        <!-- 확률바 (일반 강화와 동일한 스타일) -->
+        <div class="office-prob-bar-wrap">
+          <div class="prob-bar-label">
+            <span>강화 성공 확률</span>
+            <span id="office-prob-text">95%</span>
+          </div>
+          <div class="prob-bar">
+            <div class="prob-bar-fill" id="office-prob-fill" style="width:95%"></div>
+          </div>
+        </div>
+
+        <!-- 버튼 행 (비용 표시 포함) -->
+        <div class="btn-office-row">
+          <button class="btn-office" id="btn-office" onclick="upgradeOffice()">
+            🔧 교무실 강화<br>
+            <span style="font-size:.75rem;font-weight:400;opacity:.85;" id="office-cost-label">비용: 100G</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- 자판기 -->
+      <div class="card">
+        <div class="card-title">
+          💸 자판기
+          <span class="vend-lv-badge" id="vend-lv-text"> Lv.1</span>
+          <button class="btn-vend-upgrade" id="btn-vend-upgrade" onclick="upgradeVend()">
+            🔧 강화 —
+            <span id="vend-upgrade-cost">30,000G</span>
+          </button>
+        </div>
+        <div class="vend-row">
+          <button class="btn-vend" onclick="buyFragment()">
+            <div class="vend-info">
+              <span class="vend-name">🥖 조각빵</span>
+              <span class="vend-desc">어린이~강사 조각 랜덤 획득</span>
+            </div>
+            <span class="vend-price">1,000G</span>
+          </button>
+          <button class="btn-vend" onclick="openExam()">
+            <div class="vend-info">
+              <span class="vend-name">📝 지필고사</span>
+              <span class="vend-desc">문제를 맞히면 골드 획득</span>
+            </div>
+            <span class="vend-price">1,000G</span>
+          </button>
+          <button class="btn-vend locked" id="vend-btn-shield" onclick="vendLocked(2)">
+            <div class="vend-info">
+              <span class="vend-name">🧻 휴지 <span id="shield-count">(보유: 0개)</span></span>
+              <span class="vend-desc">강화 실패 시 초기화 1회 방어</span>
+            </div>
+            <span class="vend-price-wrap">🔒 <span class="vend-price">10,000G</span></span>
+          </button>
+          <button class="btn-vend locked" id="vend-btn-luck" onclick="vendLocked(3)">
+            <div class="vend-info">
+              <span class="vend-name">🍺 에너지 드링크</span>
+              <span class="vend-desc">30초간 모든 강화 확률 2배</span>
+            </div>
+            <span class="vend-price-wrap">🔒 <span class="vend-price">120,000G</span></span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 이펙트 오버레이 -->
+  <div id="fx-overlay">
+    <div id="fx-text"></div>
+  </div>
+
+  <!-- 지필고사 모달 -->
+  <div class="modal-bg" id="exam-modal">
+    <div class="modal">
+      <h2>지필고사</h2>
+      <p id="exam-question">시험 문제 출제중...</p>
+      <div class="modal-choices" id="exam-choices"></div>
+      <div id="exam-result" style="min-height:24px;font-size:.9rem;"></div>
+      <div class="modal-actions">
+        <button class="btn-modal-ok" id="exam-submit" onclick="submitExam()">제출</button>
+        <button class="btn-modal-ok" style="background:var(--panel2);color:var(--text);"
+          onclick="closeExam()">나가기</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 게임 클리어 -->
+  <div id="win-screen">
+    <h1>🎓 축하합니다! 🎓</h1>
+    <p>용인고를 성공적으로 졸업했습니다.</p>
+    <p id="win-stats"></p>
+    <button id="btn-restart" onclick="resetGame()">재입학하기</button>
+  </div>
+
+  <!-- 시작 화면 -->
+  <div id="start-screen">
+    <div class="start-title">학생<br>강화하기</div>
+    <div class="start-sub">학생을 강화하고 용인고를 졸업하세요!</div>
+    <button id="btn-start" onclick="startGame()">입학하기</button>
+  </div>
+
+  <button id="settings-btn" onclick="toggleSettings(event)" title="설정">⚙️</button>
+  <div id="settings-panel">
+    <div class="settings-title">설정</div>
+    <div class="settings-row">
+      <button class="btn-setting" id="btn-theme" onclick="toggleTheme()">화이트 모드로</button>
+    </div>
+    <div class="settings-row">
+      <button class="btn-setting danger" id="btn-restart-confirm" onclick="confirmRestart()">자퇴하기</button>
+    </div>
+    <div class="settings-row">
+      <div class="settings-label"><span>🎵 배경음악</span><span id="bgm-vol-label">25%</span></div>
+      <input type="range" class="settings-slider" min="0" max="1" step="0.02" value="0.3"
+        oninput="setBgmVol(this.value)">
+    </div>
+    <div class="settings-row">
+      <div class="settings-label"><span>🔊 효과음</span><span id="sfx-vol-label">70%</span></div>
+      <input type="range" class="settings-slider" min="0" max="1" step="0.02" value="0.5"
+        oninput="setSfxVol(this.value)">
+    </div>
+  </div>
+  <!-- 소리 -->
+  <audio id="audio-success" preload="auto" src="sounds/success.wav"></audio>
+  <audio id="audio-fail" preload="auto" src="sounds/fail.wav"></audio>
+  <audio id="audio-buy" preload="auto" src="sounds/buy.wav"></audio>
+  <audio id="audio-sell" preload="auto" src="sounds/sell.wav"></audio>
+  <audio id="audio-bigsuccess" preload="auto" src="sounds/bigsuccess.wav"></audio>
+  <audio id="audio-interact" preload="auto" src="sounds/interact.wav"></audio>
+  <audio id="audio-click" preload="auto" src="sounds/click.wav"></audio>
+  <audio id="audio-luckstart" preload="auto" src="sounds/luckstart.wav"></audio>
+  <audio id="audio-luckend" preload="auto" src="sounds/luckend.wav"></audio>
+  <audio id="audio-win" preload="auto" src="sounds/win.wav"></audio>
+  <audio id="audio-error" preload="auto" src="sounds/error.wav"></audio>
+
+  <audio id="bgm" loop preload="auto">
+    <source src="sounds/bgm.mp3" type="audio/mpeg">
+  </audio>
+
+  <script>
+    // ═══════════════════════════════════════════
+    //  데이터
+    // ═══════════════════════════════════════════
+    const STAGES = [
+      { name: '잼민이', cost: 0, prob: 100, sell: 0, sellable: false },
+      { name: '어린이', cost: 5, prob: 100, sell: 3, sellable: true },
+      { name: '유치원생', cost: 10, prob: 98, sell: 12, sellable: true },
+      { name: '학생', cost: 20, prob: 96, sell: 30, sellable: true },
+      { name: '우등생', cost: 30, prob: 92, sell: 65, sellable: true },
+      { name: '공부하는 학생', cost: 35, prob: 88, sell: 120, sellable: true },
+      { name: '공부하는 우등생', cost: 50, prob: 82, sell: 180, sellable: true },
+      { name: '선생을 꿈꾸는 학생', cost: 100, prob: 78, sell: 350, sellable: true },
+      { name: '수능을 보는 학생', cost: 300, prob: 64, sell: 1200, sellable: true },
+      { name: '대학생', cost: 800, prob: 55, sell: 3600, sellable: true },
+      { name: '대학원생', cost: 1500, prob: 45, sell: 7500, sellable: true },
+      { name: '선생', cost: 3000, prob: 35, sell: 20000, sellable: true },
+      { name: '교감', cost: 7000, prob: 30, sell: 55000, sellable: true },
+      { name: '교장', cost: 8000, prob: 25, sell: 85000, sellable: true },
+      { name: '강사', cost: 9000, prob: 24, sell: 120000, sellable: true },
+      { name: '교수', cost: 10000, prob: 22, sell: 250000, sellable: true },
+      { name: '교육부장관', cost: 20000, prob: 21, sell: 450000, sellable: true },
+      { name: '국무총리', cost: 50000, prob: 20, sell: 1500000, sellable: true },
+      { name: '대통령', cost: 90000, prob: 18, sell: 7500000, sellable: true },
+      { name: '신', cost: 100000, prob: 16, sell: 35000000, sellable: true },
+      { name: '멋진 학생', cost: 750000, prob: 14, sell: 120000000, sellable: true },
+      { name: '강력한 학생', cost: 6000000, prob: 12, sell: 75000000000, sellable: true },
+      { name: '위대한 학생', cost: 15000000, prob: 10, sell: 100000000000, sellable: true },
+      { name: '역사에 남을 학생', cost: 40000000, prob: 8, sell: 700000000000, sellable: true },
+      { name: '용인고 졸업장', cost: 100000000, prob: 5, sell: 0, sellable: false },
+    ];
+
+    const OFFICE = [
+      { rate: 100, gps: 0, cost: 0 },
+      { rate: 100, gps: 5, cost: 0 },
+      { rate: 92, gps: 30, cost: 300 },
+      { rate: 86, gps: 80, cost: 800 },
+      { rate: 72, gps: 200, cost: 1200 },
+      { rate: 65, gps: 450, cost: 2000 },
+      { rate: 48, gps: 800, cost: 3000 },
+      { rate: 38, gps: 1000, cost: 6000 },
+      { rate: 32, gps: 1600, cost: 10000 },
+      { rate: 20, gps: 3000, cost: 20000 },
+      { rate: 12, gps: 7000, cost: 35000 },
+      { rate: 7, gps: 10000, cost: 65000 },
+      { rate: 3, gps: 18000, cost: 80000 },
+      { rate: 1, gps: 35000, cost: 100000 },
+    ];
+
+    const FRAGMENT_REQ = {
+      7: { stage: 2, count: 1 },
+      8: { stage: 3, count: 1 },
+      9: { stage: 5, count: 1 },
+      10: { stage: 6, count: 1 },
+      11: { stage: 4, count: 2 },
+      12: { stage: 8, count: 1 },
+      13: { stage: 11, count: 1 },
+      14: { stage: 7, count: 2 },
+      15: { stage: 9, count: 2 },
+      16: { stage: 5, count: 3 },
+      17: { stage: 13, count: 1 },
+      18: { stage: 14, count: 2 },
+      19: { stage: 15, count: 2 },
+      20: { stage: 11, count: 3 },
+      21: { stage: 14, count: 3 },
+      22: { stage: 19, count: 1 },
+      23: { stage: 20, count: 1 },
+      24: { stage: 21, count: 1 },
+    };
+    // ═══════════════════════════════════════════
+    //  상태
+    // ═══════════════════════════════════════════
+    let gold = 100000;
+    let stage = 0;
+    let officeLv = 0;
+    let shields = 0;
+    let shieldEnabled = true;
+    let vendLv = 1;
+    let storage = [];
+    let fragments = {};
+    let maxStage = 0;
+    let luckActive = false;
+    let luckInterval = null;
+    let luckRemaining = 0;
+    let sfxVolume = 0.7;
+    let bgmVol = 0.25;
+    let isDark = true;
+    let examData = null;
+    let selectedChoice = null;
+    let officeIncomeStarted = false;
+
+    const stageImages = Object.fromEntries(
+      STAGES.map((_, i) => [i, `images/${i}.png`])
+    );
+
+    // ═══════════════════════════════════════════
+    //  초기화
+    // ═══════════════════════════════════════════
+    function init() {
+      const img = document.getElementById('student-img');
+      const placeholder = document.getElementById('img-placeholder-text');
+      img.onerror = () => { img.style.display = 'none'; placeholder.style.display = ''; };
+      img.onload = () => { img.style.display = 'block'; placeholder.style.display = 'none'; };
+      updateUI();
+    }
+
+    function fmtG(n) {
+      if (n === 0) return '0G';
+      return n.toLocaleString('ko-KR') + 'G';
+    }
+
+    // ═══════════════════════════════════════════
+    //  UI 업데이트
+    // ═══════════════════════════════════════════
+    function updateUI() {
+      document.getElementById('gold-display').textContent = fmtG(gold);
+      document.getElementById('max-stage-display').textContent = STAGES[maxStage].name;
+      document.getElementById('shield-count').textContent = `(보유: ${shields}개)`;
+      document.getElementById('btn-store').classList.toggle('btn-off', stage === 0);
+
+      const s = STAGES[stage];
+      document.getElementById('student-name').textContent = s.name;
+      document.getElementById('student-grade').textContent = `단계 ${stage} / ${STAGES.length - 1}`;
+
+      // 이미지
+      document.getElementById('student-img').src = stageImages[stage];
+
+      // 강화 버튼
+      const isLast = stage >= STAGES.length - 1;
+      const next = isLast ? null : STAGES[stage + 1];
+      const effectProb = next ? Math.min(100, next.prob * (luckActive ? 2 : 1)) : 0;
+      document.getElementById('btn-enhance').classList.toggle('btn-off', isLast);
+      const fragLabel = document.getElementById('enhance-frag-label');
+      if (next) {
+        document.getElementById('enhance-cost-label').textContent = `비용: ${fmtG(next.cost)}`;
+        document.getElementById('prob-text').textContent = effectProb + '%';
+        document.getElementById('prob-fill').style.width = effectProb + '%';
+        const nfr = FRAGMENT_REQ[stage + 1];
+        if (nfr) { fragLabel.style.display = ''; fragLabel.textContent = STAGES[nfr.stage].name + ' ×' + nfr.count; }
+        else fragLabel.style.display = 'none';
+      } else {
+        document.getElementById('enhance-cost-label').textContent = '최대 레벨';
+        document.getElementById('prob-text').textContent = '완료';
+        document.getElementById('prob-fill').style.width = '100%';
+        fragLabel.style.display = 'none';
+      }
+
+      // 판매
+      const sellable = s.sellable && stage > 0;
+      document.getElementById('btn-sell').classList.toggle('btn-off', !sellable);
+      document.getElementById('sell-price-label').textContent = sellable ? `판매가: ${fmtG(s.sell)}` : '-';
+
+      // 분해
+      document.getElementById('btn-dissolve-cur').classList.toggle('btn-off', stage === 0);
+
+      // 교무실
+      const lv = officeLv;
+      const ol = OFFICE[lv];
+      document.getElementById('office-lv').textContent = `Lv.${lv} — ${lv === 0 ? '수입 없음' : ol.gps + 'G/s'}`;
+      const offMaxed = lv >= OFFICE.length - 1;
+      document.getElementById('btn-office').classList.toggle('btn-off', offMaxed);
+      if (!offMaxed) {
+        const nxt = OFFICE[lv + 1];
+        const offProb = Math.min(100, nxt.rate * (luckActive ? 2 : 1));
+        document.getElementById('office-info').textContent = `다음: Lv.${lv + 1} — ${nxt.gps}G/s`;
+        document.getElementById('office-prob-text').textContent = offProb + '%';
+        document.getElementById('office-prob-fill').style.width = offProb + '%';
+        document.getElementById('office-cost-label').textContent =
+          nxt.cost != null ? `비용: ${fmtG(nxt.cost)}` : '무료';
+      } else {
+        document.getElementById('office-info').textContent = '최대 레벨 도달';
+        document.getElementById('office-prob-text').textContent = '-';
+        document.getElementById('office-prob-fill').style.width = '100%';
+        document.getElementById('office-cost-label').textContent = '최대 레벨';
+      }
+
+      // 에너지 드링크 배지
+      const badge = document.getElementById('luck-badge');
+      badge.style.display = luckActive ? 'inline-block' : 'none';
+      if (luckActive) badge.textContent = '🍀 확률 x2 (' + luckRemaining + '초)';
+
+      // 자판기 레벨
+      document.getElementById('vend-lv-text').textContent = ' Lv.' + vendLv;
+      const uvBtn = document.getElementById('btn-vend-upgrade');
+      const condMet = vendLv >= 3 || maxStage >= VEND_REQ[vendLv + 1];
+      uvBtn.classList.toggle('btn-off', vendLv >= 3 || !condMet);
+      if (vendLv >= 3) {
+        uvBtn.textContent = '최대 레벨';
+      } else if (!condMet) {
+        const req = VEND_REQ[vendLv + 1];
+        uvBtn.innerHTML = '조건: ' + STAGES[req].name + ' 도달 <span class="vend-req-badge">미충족</span>';
+      } else {
+        uvBtn.innerHTML = '강화 — <span id="vend-upgrade-cost">' + fmtG(vendLv === 1 ? 10000 : 150000) + '</span>';
+      }
+
+      syncVendButton('vend-btn-shield', vendLv >= 2, buyShield, 2, '10,000G');
+      syncVendButton('vend-btn-luck', vendLv >= 3, buyLuckPotion, 3, '120,000G');
+
+      // 휴지 pill
+      const spill = document.getElementById('btn-shield-toggle');
+      spill.textContent = shieldEnabled ? '🧻 휴지 사용 ON' : '🧻 휴지 사용 OFF';
+      spill.className = 'shield-pill ' + (shieldEnabled ? 'on' : 'off');
+
+      // 보관함
+      updateInventoryUI();
+    }
+
+    // ═══════════════════════════════════════════
+    //  강화
+    // ═══════════════════════════════════════════
+    function doEnhance() {
+      if (stage >= STAGES.length - 1) return;
+      const next = STAGES[stage + 1];
+      if (gold < next.cost) {
+        playError();
+        showFx('골드 부족!', '#ff4a6e');
+        return;
+      }
+
+      const fr = FRAGMENT_REQ[stage + 1];
+      if (fr && (fragments[fr.stage] || 0) < fr.count) {
+        playError();
+        showFx('조각 부족!', '#b06aff');
+        return;
+      }
+      if (fr) fragments[fr.stage] -= fr.count;
+
+      gold -= next.cost;
+      const effectProb = Math.min(100, next.prob * (luckActive ? 2 : 1));
+      const roll = Math.random() * 100;
+
+      if (roll < effectProb) {
+        stage++; if (stage > maxStage) maxStage = stage;
+        playSuccess(); showFx('성공!', '#3ddc84'); spawnParticles('#3ddc84');
+        if (stage === STAGES.length - 1) setTimeout(() => showWin(), 1200);
+      } else {
+        if (shields > 0 && shieldEnabled) {
+          shields--; showFx('방어!', '#ff9900');
+        } else {
+          if (stage > 0) {
+            const gc = 1 + Math.floor(Math.random() * 2);
+            fragments[stage] = (fragments[stage] || 0) + gc;
+          }
+          showFx('실패', '#ff4a6e');
+          stage = 0;
+        }
+        playFail(); spawnParticles('#ff4a6e');
+      }
+      updateUI();
+    }
+
+    function doSell() {
+      const s = STAGES[stage];
+      if (!s.sellable || stage === 0) return;
+      const earned = s.sell;
+      gold += earned;
+      playSell();
+      showFx('+' + fmtG(earned), '#f5c542');
+      spawnParticles('#f5c542');
+      stage = 0;
+      updateUI();
+    }
+
+    // ═══════════════════════════════════════════
+    //  교무실
+    // ═══════════════════════════════════════════
+    function upgradeOffice() {
+      if (officeLv >= OFFICE.length - 1) return;
+
+      const nextOffice = OFFICE[officeLv + 1];
+      if (!nextOffice) return;
+      const cost = nextOffice.cost;
+      if (cost != null && gold < cost) {
+        playError();
+        showFx('골드 부족!', '#ff4a6e');
+        return;
+      }
+
+      const baseProb = nextOffice.rate;
+      const effectProb = Math.min(100, baseProb * (luckActive ? 2 : 1));
+      if (cost != null) gold -= cost;
+
+      const roll = Math.random() * 100;
+      if (roll < effectProb) {
+        officeLv++;
+        playSuccess();
+        showFx('성공!', '#3ddc84');
+        spawnParticles('#3ddc84');
+      } else {
+
+        if (shields > 0 && shieldEnabled) { shields--; showFx('방어!', '#ff9900'); }
+        else { officeLv = Math.max(0, officeLv - 1); showFx('실패!', '#ff4a6e'); }
+        playFail();
+        spawnParticles('#ff4a6e');
+      }
+      updateUI();
+    }
+
+    function startOfficeIncome() {
+      if (officeIncomeStarted) return;
+      officeIncomeStarted = true;
+      setInterval(() => {
+        if (officeLv > 0) {
+          gold += OFFICE[officeLv].gps;
+          document.getElementById('gold-display').textContent = fmtG(gold);
+        }
+      }, 1000);
+    }
+
+    function syncVendButton(id, unlocked, handler, lockedLv, price) {
+      const btn = document.getElementById(id);
+      btn.classList.toggle('locked', !unlocked);
+      btn.onclick = unlocked ? handler : () => vendLocked(lockedLv);
+      const wrap = btn.querySelector('.vend-price-wrap');
+      const priceEl = btn.querySelector('.vend-price');
+      if (unlocked && wrap) {
+        wrap.outerHTML = `<span class="vend-price">${price}</span>`;
+      } else if (!unlocked && priceEl && !wrap) {
+        priceEl.outerHTML = `<span class="vend-price-wrap">🔒 <span class="vend-price">${price}</span></span>`;
+      }
+    }
+
+    // ═══════════════════════════════════════════
+    //  자판기
+    // ═══════════════════════════════════════════
+    function buyFragment() {
+      if (gold < 1000) { playError(); showFx('골드 부족!', '#ff4a6e'); return; }
+      gold -= 1000; playInteract();
+      const si = 1 + Math.floor(Math.random() * 14);
+      fragments[si] = (fragments[si] || 0) + 1;
+      showFx(STAGES[si].name + ' 조각 획득!', '#b06aff');
+      spawnParticles('#b06aff');
+      updateUI();
+    }
+
+    function buyShield() {
+      if (gold < 10000) {
+        playError();
+        showFx('골드 부족!', '#ff4a6e');
+        return;
+      }
+      gold -= 10000; shields++;
+      playBuy();
+      showFx('구매 성공!', '#4a9eff');
+      updateUI();
+    }
+
+    function buyLuckPotion() {
+      if (luckActive) { showFx('🍺 ' + luckRemaining + '초 남음', '#b06aff'); return; }
+      if (gold < 120000) {
+        playError();
+        showFx('골드 부족!', '#ff4a6e');
+        return;
+      }
+      gold -= 120000;
+      luckActive = true;
+      luckRemaining = 30;
+      playLuckStart();
+      showFx('확률 x2!', '#f5c542');
+      updateUI();
+      if (luckInterval) clearInterval(luckInterval);
+      luckInterval = setInterval(() => {
+        luckRemaining--;
+        const b = document.getElementById('luck-badge');
+        if (b) b.textContent = '🍀 확률 x2 (' + luckRemaining + '초)';
+        if (luckRemaining <= 0) {
+          clearInterval(luckInterval);
+          luckActive = false;
+          playLuckEnd();
+          showFx('확률 x2 종료', '#8080b0');
+          updateUI();
+        }
+      }, 1000);
+    }
+
+    // ═══════════════════════════════════════════
+    //  지필고사
+    // ═══════════════════════════════════════════
+    const EXAM_PROBLEMS = [
+      {
+        q: "다음 중 이차방정식 x² - 5x + 6 = 0의 해를 고르시오.",
+        choices: ["x=1, x=6", "x=2, x=3", "x=-2, x=-3", "x=1, x=5", "x=3, x=4"], answer: 1
+      },
+      {
+        q: "점 (3, 4)에서 원점까지의 거리로 적절한 것을 고르시오.",
+        choices: ["3", "4", "5", "6", "7"], answer: 2
+      },
+      {
+        q: "sin30° + cos60°의 값으로 적절한 것을 고르시오.",
+        choices: ["1", "1/2", "0", "√2/2", "√3/2"], answer: 0
+      },
+      {
+        q: "f(x) = 2x² + x - 4 일 때, f(1)의 값을 고르시오.",
+        choices: ["0", "1", "2", "-1", "-2"], answer: 3
+      },
+      {
+        q: "다음 중 negative의 뜻으로 적절한 것을 고르시오.",
+        choices: ["부정적인", "긍정적인", "원주민의", "극단적인", "불필요한"], answer: 0
+      },
+      {
+        q: "다음 중 agitate의 뜻으로 적절한 것을 고르시오.",
+        choices: ["경시하다.", "충돌하다.", "구별하다.", "선동하다.", "격노하다."], answer: 3
+      },
+      {
+        q: "다음 중 student의 뜻으로 적절한 것을 고르시오.",
+        choices: ["여행", "선생", "학생", "학교", "도서관"], answer: 2
+      },
+      {
+        q: "다음 중 venue의 뜻으로 적절한 것을 고르시오.",
+        choices: ["시간", "균형", "이유", "수단", "장소"], answer: 4
+      },
+      {
+        q: "다음 중 '아침식사'을 의미하는 것을 고르시오.",
+        choices: ["breakpast", "breakfast", "blackpast", "blackfast", "brackfast"], answer: 1
+      },
+      {
+        q: "다음 중 이온 결합 물질이 아닌 것을 고르시오.",
+        choices: ["NaCl", "NH₄Cl", "KCl", "MgO", "NH₃"], answer: 4
+      },
+      {
+        q: "다음 중 DNA의 염기가 아닌 것을 고르시오.",
+        choices: ["C", "A", "T", "U", "G"], answer: 3
+      },
+      {
+        q: "단 두 명만 진실을 말하고 있을 때, 유일한 정답을 고르시오.",
+        choices: ["정답은 2번 또는 5번이야.", "1번은 거짓, 4번은 진실을 말하고 있어.", "바로 내가 정답이야.", "3번은 진실을 말하고 있어.", "난 정답이 아니야."], answer: 1
+      },
+    ];
+
+    function openExam() {
+      if (gold < 1000) {
+        playError();
+        showFx('골드 부족!', '#ff4a6e');
+        return;
+      }
+      gold -= 1000;
+      playInteract();
+      selectedChoice = null;
+      examData = EXAM_PROBLEMS[Math.floor(Math.random() * EXAM_PROBLEMS.length)];
+      document.getElementById('exam-question').textContent = examData.q;
+      const cont = document.getElementById('exam-choices');
+      cont.innerHTML = '';
+      examData.choices.forEach((c, i) => {
+        const btn = document.createElement('button');
+        btn.className = 'choice-btn';
+        btn.textContent = `${i + 1}. ${c}`;
+        btn.onclick = () => {
+          document.querySelectorAll('.choice-btn').forEach(b => b.classList.remove('selected'));
+          btn.classList.add('selected');
+          selectedChoice = i;
+        };
+        cont.appendChild(btn);
+      });
+      document.getElementById('exam-result').textContent = '';
+      document.getElementById('exam-submit').disabled = false;
+      document.getElementById('exam-modal').classList.add('open');
+      updateUI();
+    }
+
+    function submitExam() {
+      if (selectedChoice === null) {
+        document.getElementById('exam-result').textContent = '답을 선택해주세요.';
+        document.getElementById('exam-result').style.color = 'var(--text)';
+        return;
+      }
+      const correct = selectedChoice === examData.answer;
+      if (correct) {
+        gold += 2500;
+        document.getElementById('exam-result').textContent = '정답! +2,500G';
+        document.getElementById('exam-result').style.color = 'var(--green)';
+        spawnParticles('#3ddc84');
+        playSuccess();
+      } else {
+        gold = Math.max(0, gold - 1500);
+        document.getElementById('exam-result').textContent = `오답! -1,500G | 정답: ${examData.answer + 1}번`;
+        document.getElementById('exam-result').style.color = 'var(--red)';
+        playFail();
+      }
+      document.getElementById('exam-submit').disabled = true;
+      updateUI();
+    }
+
+    function closeExam() {
+      document.getElementById('exam-modal').classList.remove('open');
+    }
+
+
+
+    // ═══════════════════════════════════════════
+    //  효과음
+    // ═══════════════════════════════════════════
+    function playSound(id) { const a = document.getElementById(id).cloneNode(); a.volume = sfxVolume; a.play().catch(() => { }); }
+    function playSuccess() { playSound('audio-success'); }
+    function playFail() { playSound('audio-fail'); }
+    function playBuy() { playSound('audio-buy'); }
+    function playSell() { playSound('audio-sell'); }
+    function playBigSuccess() { playSound('audio-bigsuccess'); }
+    function playInteract() { playSound('audio-interact'); }
+    function playClick() { playSound('audio-click'); }
+    function playLuckStart() { playSound('audio-luckstart'); }
+    function playLuckEnd() { playSound('audio-luckend'); }
+    function playWin() { playSound('audio-win'); }
+    function playError() { playSound('audio-error'); }
+    function startBGM() { const b = document.getElementById('bgm'); b.volume = bgmVol; b.play().catch(() => { }); }
+
+    // ═══════════════════════════════════════════
+    //  시각 이펙트
+    // ═══════════════════════════════════════════
+    let fxTimeout = null;
+    function showFx(msg, color) {
+      const el = document.getElementById('fx-text');
+      el.innerHTML = msg.replace(/\n/g, '<br>');
+      el.style.color = color;
+      el.style.animation = 'none';
+      el.offsetHeight;
+      el.style.animation = 'fxIn .5s ease forwards';
+      if (fxTimeout) clearTimeout(fxTimeout);
+      fxTimeout = setTimeout(() => { el.style.animation = 'fxOut .4s ease forwards'; }, 1500);
+    }
+
+    function spawnParticles(color) {
+      const cx = window.innerWidth / 2;
+      const cy = window.innerHeight / 2;
+
+      for (let i = 0; i < 24; i++) {
+
+        const p = document.createElement('div');
+        p.className = 'particle';
+
+        const size = 12 + Math.random() * 10;
+
+        const angle = Math.random() * Math.PI * 2;
+
+        const distance = 80 + Math.random() * 100;
+
+        const tx = Math.cos(angle) * distance;
+        const ty = Math.sin(angle) * distance;
+
+        p.style.cssText = `
+      width:${size}px;
+      height:${size}px;
+      background:${color};
+      left:${cx - size / 2}px;
+      top:${cy - size / 2}px;
+      --tx:${tx}px;
+      --ty:${ty}px;
+      animation-delay:${Math.random() * 0.2}s;
+      opacity:.9;
+    `;
+
+        document.body.appendChild(p);
+
+        setTimeout(() => p.remove(), 1500);
+      }
+    }
+
+    // ═══════════════════════════════════════════
+    //  게임 클리어
+    // ═══════════════════════════════════════════
+    function showWin() {
+      document.getElementById('win-stats').textContent =
+        `잔여 골드: ${fmtG(gold)}`;
+      document.getElementById('win-screen').classList.add('open');
+      spawnParticles('#f5c542');
+      spawnParticles('#3ddc84');
+      playWin();
+      setTimeout(() => { spawnParticles('#b06aff'); spawnParticles('#f5c542'); }, 600);
+    }
+
+    const VEND_REQ = { 2: 3, 3: 11 }; // 다음 Lv 업그레이드 최소 maxStage
+    function upgradeVend() {
+      if (vendLv >= 3) return;
+      const req = VEND_REQ[vendLv + 1];
+      if (maxStage < req) {
+        showFx(STAGES[req].name + ' 도달 필요', '#ff9900');
+        return;
+      }
+      const cost = vendLv === 1 ? 10000 : 150000;
+      if (gold < cost) { playError(); showFx('골드 부족!', '#ff4a6e'); return; }
+      gold -= cost; vendLv++;
+      playBigSuccess(); showFx('자판기 Lv.' + vendLv + '!', '#f5c542'); spawnParticles('#f5c542');
+      updateUI();
+    }
+    function vendLocked(lv) { showFx('Lv.' + lv + ' 필요', '#ff9900'); }
+    function toggleShieldUse() { playClick(); shieldEnabled = !shieldEnabled; updateUI(); }
+    function dissolveCurrentStudent() {
+      if (stage === 0) return;
+      const cnt = 3 + Math.floor(Math.random() * 4); // 3~6
+      const si = stage;
+      stage = 0;
+      fragments[si] = (fragments[si] || 0) + cnt;
+      playInteract();
+      showFx(STAGES[si].name + ' x' + cnt, '#b06aff');
+      spawnParticles('#b06aff');
+      updateUI();
+    }
+    function storeStudent() {
+      if (stage === 0) return;
+      storage.push({ stage });
+      showFx('보관', '#4a9eff');
+      spawnParticles('#4a9eff');
+      playInteract();
+      stage = 0;
+      updateUI();
+    }
+    function retrieveStudent(idx) {
+      const item = storage.splice(idx, 1)[0];
+      if (stage > 0) storage.push({ stage });
+      stage = item.stage;
+      showFx('꺼내기', '#4a9eff');
+      spawnParticles('#4a9eff');
+      playInteract();
+      updateUI();
+    }
+    function switchInventoryTab(tab) {
+      document.getElementById('pane-students').classList.toggle('active', tab === 'students');
+      document.getElementById('pane-frags').classList.toggle('active', tab === 'frags');
+      document.getElementById('tab-students').classList.toggle('active', tab === 'students');
+      document.getElementById('tab-frags').classList.toggle('active', tab === 'frags');
+    }
+
+    function updateInventoryUI() {
+      const studentListEl = document.getElementById('stored-student-list');
+      const fragmentListEl = document.getElementById('fragment-list');
+
+      if (studentListEl) {
+        studentListEl.innerHTML = storage.length === 0
+          ? '<p class="inventory-empty">보관된 학생이 없습니다</p>'
+          : storage.map((item, idx) => `<div class="inventory-card">
+              <div class="inventory-icon">🧑‍🎓</div>
+              <div class="inventory-body">
+                <div class="inventory-title">${STAGES[item.stage].name}</div>
+                <div class="inventory-meta">${item.stage}단계</div>
+              </div>
+              <button class="btn-retrieve" onclick="retrieveStudent(${idx})">꺼내기</button>
+            </div>`).join('');
+      }
+
+      if (fragmentListEl) {
+        const entries = Object.entries(fragments).filter(([, v]) => v > 0).sort(([a], [b]) => +a - +b);
+        fragmentListEl.innerHTML = entries.length === 0
+          ? '<p class="inventory-empty">보유 조각이 없습니다</p>'
+          : entries.map(([stageIdx, count]) => {
+            const stageInfo = STAGES[+stageIdx];
+            return `<div class="inventory-card">
+              <div class="inventory-icon">🧩</div>
+              <div class="inventory-body">
+                <div class="inventory-title">${stageInfo.name} 조각</div>
+                <div class="inventory-meta">${stageIdx}단계</div>
+              </div>
+              <div class="inventory-badge">×${count}</div>
+            </div>`;
+          }).join('');
+      }
+    }
+    function startGame() {
+      const s = document.getElementById('start-screen');
+      s.classList.add('hidden');
+      setTimeout(() => s.remove(), 400);
+      startBGM();
+      startOfficeIncome();
+    }
+    function toggleSettings(e) {
+      playClick();
+      e.stopPropagation();
+      document.getElementById('settings-panel').classList.toggle('open');
+    }
+    document.addEventListener('click', (e) => {
+      const p = document.getElementById('settings-panel');
+      if (p && !p.contains(e.target) && e.target.id !== 'settings-btn') p.classList.remove('open');
+    });
+    function toggleTheme() {
+      playClick();
+      isDark = !isDark;
+      document.documentElement.setAttribute('data-theme', isDark ? '' : 'light');
+      document.getElementById('btn-theme').textContent = isDark ? '화이트 모드로' : '다크 모드로';
+    }
+    function setBgmVol(v) {
+      bgmVol = parseFloat(v);
+      document.getElementById('bgm-vol-label').textContent = Math.round(bgmVol * 100) + '%';
+      document.getElementById('bgm').volume = bgmVol;
+    }
+    function setSfxVol(v) {
+      sfxVolume = parseFloat(v);
+      document.getElementById('sfx-vol-label').textContent = Math.round(sfxVolume * 100) + '%';
+    }
+    let restartPending = false;
+    function confirmRestart() {
+      playClick();
+      const btn = document.getElementById('btn-restart-confirm');
+      if (!restartPending) {
+        restartPending = true;
+        btn.textContent = '한 번 더 클릭';
+        btn.style.background = '#8b0000';
+        btn.style.borderColor = '#8b0000';
+        btn.addEventListener('mouseleave', cancelRestart, { once: true });
+      } else {
+        window.location.reload();
+      }
+    }
+    function cancelRestart() {
+      restartPending = false;
+      const btn = document.getElementById('btn-restart-confirm');
+      if (!btn) return;
+      btn.textContent = '자퇴하기';
+      btn.style.background = '';
+      btn.style.borderColor = '';
+    }
+    function resetGame() {
+      gold = 100000;
+      stage = 0;
+      officeLv = 0;
+      shields = 0;
+      shieldEnabled = true;
+      vendLv = 1;
+      storage = [];
+      fragments = {};
+      maxStage = 0;
+      luckActive = false;
+      luckRemaining = 0;
+      if (luckInterval) clearInterval(luckInterval);
+      luckInterval = null;
+      document.getElementById('win-screen').classList.remove('open');
+      updateUI();
+    }
+
+    // ═══════════════════════════════════════════
+    //  시작
+    // ═══════════════════════════════════════════
+    init();
+
+    //ㅇㅋ
+
+  </script>
+</body>
+
+</html>
